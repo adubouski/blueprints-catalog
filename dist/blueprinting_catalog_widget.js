@@ -9,19 +9,24 @@
     var blueprintRegex = /blueprint.yaml$/i;
 
     var groups = {
-        blueprints: {
+        nfv: {
             order: 1,
+            name: 'NFV',
+            githubQuery: '-nfv+in:name+fork:true+user:cloudify-examples'
+        },
+        blueprints: {
+            order: 2,
             name: 'blueprints',
-            githubQuery: '-example+in:name+fork:true+user:cloudify-examples',
+            githubQuery: '-blueprint+in:name+fork:true+user:cloudify-examples',
             canUpload: true
         },
         plugins: {
-            order: 2,
+            order: 3,
             name: 'plugins',
             githubQuery: '-plugin+in:name+fork:true+user:cloudify-examples'
         },
         integrations: {
-            order: 3,
+            order: 4,
             name: 'integrations',
             githubQuery: '-integration+in:name+fork:true+user:cloudify-examples'
         }
@@ -43,6 +48,7 @@
                     blueprintsGithubQuery: '@catalogBlueprintsGithubQuery',
                     pluginsGithubQuery: '@catalogPluginsGithubQuery',
                     integrationsGithubQuery: '@catalogIntegrationsGithubQuery',
+                    nfvGithubQuery: '@catalogNFVGithubQuery',
                     listTitle: '@catalogListTitle',
                     listDescription: '@catalogListDescription',
                     howUseLink: '@catalogHowUseLink',
@@ -65,6 +71,9 @@
                     }
                     if ($scope.integrationsGithubQuery) {
                         groups.integrations.githubQuery = $scope.integrationsGithubQuery;
+                    }
+                    if ($scope.nfvGithubQuery) {
+                        groups.nfv.githubQuery = $scope.nfvGithubQuery;
                     }
                     if ($scope.defaultVersion) {
                         defaultVersion = $scope.defaultVersion;
@@ -196,7 +205,7 @@
                             $scope.error = undefined;
                             CloudifyManager.upload($scope.managerEndpoint, $scope.blueprint)
                                 .then(function () {
-                                    $scope.uploadRepo = undefined;
+                                    $scope.closeUpload();
                                 }, function (response) {
                                     $log.debug(LOG_TAG, 'upload failed', response);
 
@@ -467,7 +476,7 @@ angular.module('blueprintingCatalogWidget').run(['$templateCache', function($tem
 
 
   $templateCache.put('repos_list_tpl.html',
-    "<div class=\"repos-list\"> <div class=\"search-repos\"> <h4>{{type}}:</h4> <input type=\"text\" ng-model=\"search.name\" placeholder=\"search {{type}} by name\"> </div> <table> <colgroup> <col class=\"col-name\"> <col class=\"col-descr\"> <col class=\"col-source\"> <col ng-if=\"canUpload\" class=\"col-action\"> </colgroup> <thead> <tr> <th>Name</th> <th>Description</th> <th>Source</th> <th ng-if=\"canUpload\">Action</th> </tr> </thead> <tr ng-repeat=\"repo in filtered = (repos | filter:search)\"> <td> <a href ng-click=\"showDetails({repo: repo});\">{{::repo.name}}</a> </td> <td> {{::repo.description}} </td> <td> <a ng-href=\"{{::repo.html_url}}\" target=\"_tab_{{::repo.id}}\">Source</a> </td> <td ng-if=\"canUpload\"> <a href ng-click=\"showUpload({repo: repo});\">Upload to Manager</a> </td> </tr> <tr ng-show=\"!loading && !filtered.length\"> <td colspan=\"{{canUpload ? 4 : 3}}\">No Data Found</td> </tr> <tr ng-show=\"loading\"> <td colspan=\"{{canUpload ? 4 : 3}}\">Loading...</td> </tr> </table> </div>"
+    "<div class=\"repos-list\"> <div class=\"search-repos\"> <h4>{{type}}:</h4> <input type=\"text\" ng-model=\"search.name\" placeholder=\"search {{type}} by name\"> </div> <div class=\"repos-row\"> <div class=\"lab\" ng-repeat=\"repo in filtered = (repos | filter:search)\"> <h4>{{::repo.name}}</h4> <p>{{::repo.description}}</p> <div class=\"repo-actions\"> <a ng-href=\"{{::repo.html_url}}\" target=\"_tab_{{::repo.id}}\">Source</a> <span ng-if=\"canUpload\">| <a href ng-click=\"showUpload({repo: repo});\">Upload to Manager</a></span> </div> </div> </div> <div ng-show=\"!loading && !filtered.length\"> <td colspan=\"{{canUpload ? 4 : 3}}\">No Data Found</td> </div> <div ng-show=\"loading\"> <td colspan=\"{{canUpload ? 4 : 3}}\">Loading...</td> </div> </div>"
   );
 
 
